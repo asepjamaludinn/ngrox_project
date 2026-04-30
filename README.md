@@ -1,116 +1,83 @@
-# Dockerized Fullstack Application
+# Project 1: Dockerized Fullstack Application (Node.js & MongoDB)
 
-## Overview
+Tugas ini merupakan implementasi kontainerisasi aplikasi fullstack menggunakan Docker dan Docker Compose, dilengkapi dengan kustomisasi infrastruktur dan eksposur publik menggunakan Ngrok.
 
-This repository hosts a Dockerized Full-Stack Application built with Node.js, Express, and MongoDB. The project aims to provide a convenient development environment encapsulated within Docker containers. It simplifies the setup and running of a local version of your application.
+## Struktur Proyek
 
-## Why Use Docker?
+Proyek ini terdiri dari dua layanan utama:
 
-### Benefits of Docker
+- **App Service**: Aplikasi Node.js dengan framework Express dan EJS sebagai view engine.
+- **Database Service**: MongoDB sebagai penyimpanan data postingan.
 
-- **Isolation**: Docker containers encapsulate your application and its dependencies, ensuring consistency and preventing conflicts between development and production environments.
+## Langkah-langkah yang Telah Dilakukan
 
-- **Portability**: Docker containers can run on various platforms without modification, making it easy to move applications between different environments.
+### 1. Persiapan dan Kloning Repositori
 
-- **Efficiency**: Docker containers are lightweight and start quickly, reducing resource overhead and speeding up development and deployment processes.
-
-- **Scalability**: Docker facilitates the scaling of applications by creating multiple containers from a single image, making it suitable for both small projects and large-scale applications.
-
-- **Dependency Management**: Docker enables you to define dependencies and configurations within a Dockerfile, ensuring that your application runs consistently across different environments.
-
-## Key Features
-
-- **Full-Stack Application**: This project demonstrates the development of a full-stack web application, including the backend (Node.js) and frontend (EJS templates).
-
-- **Database Integration**: MongoDB is used as the database to store application data, and it is containerized using Docker for easy setup.
-
-- **Docker Compose**: Docker Compose simplifies multi-container Docker application orchestration, making it effortless to manage both the application and database containers together.
-
-## Directory Structure
+Melakukan kloning repositori dasar dan memeriksa struktur file untuk memahami dependensi antar service.
 
 ```bash
-.
-├── app
-│   ├── Dockerfile
-│   ├── index.js
-│   ├── models
-│   │   └── Item.js
-│   ├── node_modules
-│   ├── package.json
-│   └── views
-│       └── index.ejs
-├── docker-compose.yml
-└── README.md
+git clone [https://github.com/HardevKhandhar/dockerized-fullstack-application](https://github.com/HardevKhandhar/dockerized-fullstack-application)
+cd dockerized-fullstack-application
 ```
 
-### Key Directories and Files
+### 2. Terapkan Kustomisasi Wajib & Tantangan Tambahan
 
-- `app/`: Contains the Node.js application code.
-  - `Dockerfile`: Defines the Docker image for the Node.js application.
-  - `index.js`: Main application file.
-  - `models/`: Houses application data models.
-  - `node_modules/`: Holds Node.js dependencies.
-  - `package.json`: Specifies Node.js application configuration.
-  - `views/`: Stores application views.
+Melakukan modifikasi pada file docker-compose.yml untuk memenuhi kriteria tugas dan tantangan teknis:
 
-- `docker-compose.yml`: Specifies Docker services and their interactions.
-- `README.md`: The file you are currently reading.
+- Port Mapping: Mengubah port host dari 3000 menjadi 8080 untuk menghindari konflik port.
+- Volume Persistence: Menambahkan volume mongo_data pada service MongoDB agar data tidak hilang saat container dihapus.
+- Environment Variables: Memasukkan variabel lingkungan (DB_HOST, DB_PORT, MONGO_INITDB_DATABASE) untuk konfigurasi infrastruktur yang lebih profesional.
 
-> **Note**: The `node_modules` directory is intentionally not included in the repository. It is generated locally when you install project dependencies using `npm install`. This omission keeps the repository size smaller and avoids adding a large number of third-party library files to version control. The `package.json` file specifies the project's dependencies, giving you a general idea of what the `node_modules` directory will contain and where to find it.
+### 3. Eksekusi Docker Compose
 
-## Docker Compose Configuration
+Membangun image dan menjalankan container di latar belakang.
 
-The `docker-compose.yml` file defines two Docker services:
+```Bash
+docker-compose up -d --build
+```
 
-### 1. `app`
+Verifikasi status container menggunakan:
 
-- Dockerizes the Node.js application.
-- Exposes port 3000 for accessing the application.
-- Links to the `mongo` service for database connectivity.
-- Mounts the application code and node_modules for development.
+```Bash
+docker ps
+```
 
-### 2. `mongo`
+### 4. Konfigurasi Ngrok (Public Tunneling)
 
-- Utilizes the official MongoDB Docker image.
-- Exposes port 27017 for MongoDB access.
+Menggunakan Ngrok untuk membuat tunnel aman dari localhost ke internet publik agar aplikasi dapat diakses oleh dosen/penguji secara remote.
 
-## Getting Started
+```PowerShell
+.\\ngrok config add-authtoken <YOUR_AUTHTOKEN>
+.\\ngrok http 8080
+```
 
-To set up and run the Dockerized Full-Stack Application:
+## Detail Kustomisasi (docker-compose.yml)
 
-1. Ensure Docker and Docker Compose are installed on your system.
-2. Clone this repository to your local machine.
-3. Navigate to the project directory.
-    ```bash
-    cd dockerized-fullstack-application
-    ```
-4. Build and start the application using Docker Compose.
-    ```bash
-    docker-compose up --build
-    ```
-5. Access the application in your web browser at `http://localhost:3000`.
-6. To shut down the application and clean up Docker resources when you're done:
+Berikut adalah perubahan signifikan yang dilakukan pada konfigurasi:
 
-- Press `Ctrl+C` in the terminal where Docker Compose is running to stop the containers.
-- To remove the stopped containers, networks, and volumes associated with this project, run:
-    ```bash
-    docker-compose down
-    ```
-- Additionally, you can remove any unused Docker resources (e.g., dangling images, containers, and networks) by running:
-    ```bash
-    docker system prune -a
-    ```
-- These commands will help you gracefully shut down the application and free up any unused Docker resources.
+```YAML
+services:
+  app:
+    ports:
+      - "8080:3000" # Host:Container
+    environment:
+      - DB_HOST=mongo
+      - DB_PORT=27017
 
-## Dependencies
+  mongo:
+    environment:
+      - MONGO_INITDB_DATABASE=app
+    volumes:
+      - mongo_data:/data/db
 
-The project relies on the following key dependencies:
+volumes:
+  mongo_data:
+```
 
-- Express: Web framework for Node.js.
-- Mongoose: MongoDB object modeling tool.
-- EJS: Embedded JavaScript templates.
-- Body Parser: Middleware for parsing HTTP request bodies.
+## Cara Verifikasi
 
----
+Akses Lokal: Buka http://localhost:8080 di browser.
 
-Thank you!
+Akses Publik: Gunakan URL Forwarding dari Ngrok (misal: https://saloon-empirical-wriggly.ngrok-free.dev).
+
+Inspeksi Traffic: Buka Dashboard Ngrok di http://127.0.0.1:4040.
