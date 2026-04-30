@@ -16,7 +16,7 @@ Proyek ini terdiri dari dua layanan utama:
 Melakukan kloning repositori dasar dan memeriksa struktur file untuk memahami dependensi antar service.
 
 ```bash
-git clone [https://github.com/HardevKhandhar/dockerized-fullstack-application](https://github.com/HardevKhandhar/dockerized-fullstack-application)
+git clone https://github.com/HardevKhandhar/dockerized-fullstack-application
 cd dockerized-fullstack-application
 ```
 
