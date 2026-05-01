@@ -46,9 +46,11 @@ docker ps
 
 Menggunakan Ngrok untuk membuat tunnel aman dari localhost ke internet publik agar aplikasi dapat diakses oleh dosen/penguji secara remote.
 
+_(Catatan: File eksekusi Ngrok tidak diletakkan di dalam repositori ini karena sudah dikonfigurasi secara global melalui System Environment Variables / PATH Windows)._
+
 ```PowerShell
-.\\ngrok config add-authtoken <YOUR_AUTHTOKEN>
-.\\ngrok http 8080
+ngrok config add-authtoken <YOUR_AUTHTOKEN>
+ngrok http 8080
 ```
 
 ## Detail Kustomisasi (docker-compose.yml)
@@ -81,3 +83,9 @@ Akses Lokal: Buka http://localhost:8080 di browser.
 Akses Publik: Gunakan URL Forwarding dari Ngrok (misal: https://saloon-empirical-wriggly.ngrok-free.dev).
 
 Inspeksi Traffic: Buka Dashboard Ngrok di http://127.0.0.1:4040.
+
+### Verifikasi Persistensi Data (Tantangan Tambahan):
+
+- Jalankan `docker volume ls` untuk memastikan volume `mongo_data` telah tercipta.
+- Tambahkan postingan baru via web.
+- Matikan container dengan `docker-compose down` lalu nyalakan kembali dengan `docker-compose up -d`. Data postingan terbukti tidak hilang
